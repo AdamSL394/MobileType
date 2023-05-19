@@ -1,19 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View, SafeAreaView } from 'react-native';
-import {API_URL} from "@env"
+import { FlatList, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { MyStack } from './Mystack';
+
+import { HomeScreen } from './screens/Home';
+import { Details } from './screens/Details';
+
+export type RootStackParamList = {
+  Home: undefined;
+  Details: { productId: string };
+};
 
 export default function App() {
   const [notes, setNotes] = useState();
+  const Stack = createNativeStackNavigator();
 
   useEffect(() => {
     getNotes();
   }, []);
   const getNotes = async () => {
-    var requestOptions = {
+    const requestOptions = {
       method: 'GET',
       redirect: 'follow',
-    };
+    } as RequestInit;
 
     const recentlyUpdatedNotes = await fetch(
       process.env.API_URL,
@@ -25,8 +35,7 @@ export default function App() {
         return result;
       })
       .catch((error) => console.log('error', error));
-    console.log(JSON.parse(recentlyUpdatedNotes).length);
-    setNotes(JSON.parse(recentlyUpdatedNotes));
+    setNotes(JSON.parse(recentlyUpdatedNotes as string));
   };
 
   const DATA = [
@@ -63,24 +72,26 @@ export default function App() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-      <SafeAreaView style={styles.container}>
-        <FlatList
-          data={notes}
-          renderItem={({ item }) => <Item text={item.text} />}
-          keyExtractor={(item) => item._id}
-        />
-      </SafeAreaView>
-    </View>
+    <NavigationContainer>
+      <View style={styles.container}>
+        <Text>Open up App.js to start working on your app!</Text>
+        <StatusBar/>
+        <SafeAreaView style={styles.container}>
+          <FlatList
+            data={notes}
+            renderItem={({ item }) => <Item text={item.text} />}
+            keyExtractor={(item) => item._id}
+          />
+        </SafeAreaView>
+      </View>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: StatusBar.currentHeight || 0,
+    marginTop: 0,
   },
   item: {
     backgroundColor: 'light grey',
